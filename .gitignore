@@ -1,0 +1,8 @@
+target
+project/project
+.bsp
+.idea
+.metals
+dist
+.parcel-cache
+node_modules
