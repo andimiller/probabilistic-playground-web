@@ -240,7 +240,7 @@ object Tuple extends TyrianApp[Msg, Model]:
             p(s"Actual Sum: ${model.sum}"),
             hr(),
             p(
-              s"Estimated Average Formula: ${model.estimatedSum} / ${model.topK}"
+              s"Estimated Average Formula: ${model.estimatedSum} / ${model.estimate}"
             ),
             p(s"Estimated Average: ${model.estimatedAverage}"),
             p(s"Actual Average: ${model.average}")
@@ -280,7 +280,10 @@ case class Model(
   def average: Long =
     if (rows.isEmpty) 0 else rows.map(_.value).sum / rows.length
   def estimatedAverage: Long =
-    (rows.filter(_.keep).map(_.value).sum * (estimate / topK) / topK).toLong
+    (rows
+      .filter(_.keep)
+      .map(_.value)
+      .sum * (estimate / topK) / estimate).toLong
 }
 
 enum MergeType:
