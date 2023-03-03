@@ -206,13 +206,15 @@ object Tuple extends TyrianApp[Msg, Model]:
                 )
               ),
               tbody(
-                model.rows.sortBy(_.theta).map { row =>
+                model.rows.sortBy(_.theta).zipWithIndex.map { case (row, idx) =>
                   val bgStyle =
                     if (row.keep) "background-color: lightgray" else ""
                   tr(style := bgStyle)(
                     td(row.input),
                     td(row.hash.toString),
-                    td(row.theta.toString),
+                    if (idx == model.topK - 1)
+                      b(`class` := "green-text")(td(row.theta.toString))
+                    else td(row.theta.toString),
                     td(row.value.toString),
                     td(row.keep.toString)
                   )
@@ -223,24 +225,53 @@ object Tuple extends TyrianApp[Msg, Model]:
           div(id := "output", cls := "col m3 s12")(
             h5("Outputs"),
             p(
-              s"Estimate Formula: ${model.topK} - 1 / ${model.topTheta.getOrElse(0d)}"
+              List(
+                text(s"Estimate Formula: ${model.topK} - 1 / "),
+                b(`class` := "green-text")(
+                  s"${model.topTheta.getOrElse(0d)}"
+                )
+              )
             ),
             p(
-              s"Estimated unique items: ${model.estimate}"
+              List(
+                text("Estimated unique items: "),
+                b(`class` := "orange-text")(
+                  model.estimate.toString
+                )
+              )
             ),
             p(s"Actual unique items: ${model.uniques}"),
             hr(),
             p(
-              s"Estimated Sum Formula: ${model.rows
-                .filter(_.keep)
-                .map(_.value)
-                .sum} * (${model.estimate} / ${model.topK})"
+              List(
+                text("Sum of Included Values: "),
+                b(`class` := "red-text")(model.includedSum.toString)
+              )
             ),
-            p(s"Estimated Sum: ${model.estimatedSum}"),
+            p(
+              List(
+                text(s"Estimated Sum Formula: "),
+                b(`class` := "red-text")(model.includedSum.toString),
+                text(" * ("),
+                b(`class` := "orange-text")(model.estimate.toString),
+                text(s" / ${model.topK})")
+              )
+            ),
+            p(
+              List(
+                text(s"Estimated Sum: "),
+                b(`class` := "purple-text")(model.estimatedSum.toString)
+              )
+            ),
             p(s"Actual Sum: ${model.sum}"),
             hr(),
             p(
-              s"Estimated Average Formula: ${model.estimatedSum} / ${model.estimate}"
+              List(
+                text(s"Estimated Average Formula: "),
+                b(`class` := "purple-text")(model.estimatedSum.toString),
+                text(" / "),
+                b(`class` := "orange-text")(model.estimate.toString)
+              )
             ),
             p(s"Estimated Average: ${model.estimatedAverage}"),
             p(s"Actual Average: ${model.average}")
@@ -277,6 +308,8 @@ case class Model(
     rows.map(_.value).sum
   def estimatedSum: Long =
     (rows.filter(_.keep).map(_.value).sum * (estimate / topK)).toLong
+  def includedSum: Long =
+    rows.filter(_.keep).map(_.value).sum
   def average: Long =
     if (rows.isEmpty) 0 else rows.map(_.value).sum / rows.length
   def estimatedAverage: Long =
