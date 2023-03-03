@@ -15,7 +15,7 @@ import scala.util.hashing.MurmurHash3
 object Tuple extends TyrianApp[Msg, Model]:
 
   def init(flags: Map[String, String]): (Model, Cmd[IO, Msg]) =
-    (Model("", 10, 0, List.empty, MergeType.Sum), Cmd.None)
+    (Model("", 0, 10, List.empty, MergeType.Sum), Cmd.None)
 
   // we're just going to cheat and hash it twice with murmur3 32-bit
   def hash(s: String): Long =
@@ -122,7 +122,7 @@ object Tuple extends TyrianApp[Msg, Model]:
           ),
           h4("Simulation"),
           p(
-            "In this simulation we're keeping Longs as our values, and defining our merge method as SUM"
+            "In this simulation we're keeping Longs as our values, and making Sum, Min and Max available as merge functions, but we could use any data type, and any merge function."
           )
         ),
         div(cls := "row")(
@@ -237,7 +237,13 @@ object Tuple extends TyrianApp[Msg, Model]:
                 .sum} * (${model.estimate} / ${model.topK})"
             ),
             p(s"Estimated Sum: ${model.estimatedSum}"),
-            p(s"Actual Sum: ${model.sum}")
+            p(s"Actual Sum: ${model.sum}"),
+            hr(),
+            p(
+              s"Estimated Average Formula: ${model.estimatedSum} / ${model.topK}"
+            ),
+            p(s"Estimated Average: ${model.estimatedAverage}"),
+            p(s"Actual Average: ${model.average}")
           )
         )
       )
@@ -269,10 +275,12 @@ case class Model(
     rows.map(_.input).distinct.size
   def sum: Long =
     rows.map(_.value).sum
-  def estimatedSum: Long = {
-    val retained = rows.count(_.keep)
-    (rows.filter(_.keep).map(_.value).sum * (estimate / retained)).toLong
-  }
+  def estimatedSum: Long =
+    (rows.filter(_.keep).map(_.value).sum * (estimate / topK)).toLong
+  def average: Long =
+    if (rows.isEmpty) 0 else rows.map(_.value).sum / rows.length
+  def estimatedAverage: Long =
+    (rows.filter(_.keep).map(_.value).sum * (estimate / topK) / topK).toLong
 }
 
 enum MergeType:
