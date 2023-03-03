@@ -12,7 +12,7 @@ import scala.scalajs.js.annotation.*
 import scala.util.hashing.MurmurHash3
 
 @JSExportTopLevel("TyrianApp")
-object ProbabilisticPlayground extends TyrianApp[Msg, Model]:
+object Theta extends TyrianApp[Msg, Model]:
 
   def init(flags: Map[String, String]): (Model, Cmd[IO, Msg]) =
     (Model("", 10, List.empty), Cmd.None)
