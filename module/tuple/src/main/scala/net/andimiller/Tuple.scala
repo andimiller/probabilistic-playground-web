@@ -9,6 +9,7 @@ import tyrian.Navigation
 import tyrian.*
 
 import java.nio.ByteBuffer
+import java.text.DecimalFormat
 import scala.scalajs.js.annotation.*
 import scala.util.hashing.MurmurHash3
 
@@ -103,6 +104,9 @@ object Tuple extends TyrianApp[Msg, Model]:
         }
       )
     case Msg.NoOp => (model, Cmd.None)
+
+  inline private def formatDecimalPoints(dp: Int)(d: Double): String =
+    String.format(s"%,.0${dp}f", d)
 
   def view(model: Model): Html[Msg] =
     div()(
@@ -211,8 +215,10 @@ object Tuple extends TyrianApp[Msg, Model]:
                       row.hash.toHexString
                     ),
                     if (idx == model.topK - 1)
-                      b(`class` := "green-text")(td(row.theta.toString))
-                    else td(row.theta.toString),
+                      b(`class` := "green-text")(
+                        td(formatDecimalPoints(10)(row.theta))
+                      )
+                    else td(formatDecimalPoints(10)(row.theta)),
                     td(row.value.toString),
                     td(row.keep.toString)
                   )
@@ -226,7 +232,7 @@ object Tuple extends TyrianApp[Msg, Model]:
               List(
                 text(s"Estimate Formula: ${model.topK} - 1 / "),
                 b(`class` := "green-text")(
-                  s"${model.topTheta.getOrElse(0d)}"
+                  formatDecimalPoints(10)(model.topTheta.getOrElse(0d))
                 )
               )
             ),
@@ -234,7 +240,7 @@ object Tuple extends TyrianApp[Msg, Model]:
               List(
                 text("Estimated unique items: "),
                 b(`class` := "orange-text")(
-                  model.estimate.toString
+                  formatDecimalPoints(2)(model.estimate)
                 )
               )
             ),
@@ -243,7 +249,9 @@ object Tuple extends TyrianApp[Msg, Model]:
             p(
               List(
                 text("Sum of Included Values: "),
-                b(`class` := "red-text")(model.includedSum.toString)
+                b(`class` := "red-text")(
+                  model.includedSum.toString
+                )
               )
             ),
             p(
@@ -251,7 +259,9 @@ object Tuple extends TyrianApp[Msg, Model]:
                 text(s"Estimated Sum Formula: "),
                 b(`class` := "red-text")(model.includedSum.toString),
                 text(" * ("),
-                b(`class` := "orange-text")(model.estimate.toString),
+                b(`class` := "orange-text")(
+                  formatDecimalPoints(2)(model.estimate)
+                ),
                 text(s" / ${model.topK})")
               )
             ),
@@ -268,7 +278,9 @@ object Tuple extends TyrianApp[Msg, Model]:
                 text(s"Estimated Average Formula: "),
                 b(`class` := "purple-text")(model.estimatedSum.toString),
                 text(" / "),
-                b(`class` := "orange-text")(model.estimate.toString)
+                b(`class` := "orange-text")(
+                  formatDecimalPoints(2)(model.estimate)
+                )
               )
             ),
             p(s"Estimated Average: ${model.estimatedAverage}"),
