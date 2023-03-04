@@ -3,6 +3,7 @@ package net.andimiller
 import cats.effect.IO
 import org.scalajs.dom.document
 import org.scalajs.dom.html.Input
+import scodec.bits.ByteVector
 import tyrian.Html.*
 import tyrian.Navigation
 import tyrian.*
@@ -17,16 +18,11 @@ object Tuple extends TyrianApp[Msg, Model]:
   def init(flags: Map[String, String]): (Model, Cmd[IO, Msg]) =
     (Model("", 0, 10, List.empty, MergeType.Sum), Cmd.None)
 
-  // we're just going to cheat and hash it twice with murmur3 32-bit
   def hash(s: String): Long =
-    ByteBuffer
-      .allocate(8)
-      .putInt(MurmurHash3.stringHash(s))
-      .putInt(MurmurHash3.stringHash(s.reverse))
-      .getLong(0)
+    Integer.toUnsignedLong(MurmurHash3.stringHash(s))
 
   private def hashToTheta(hash: Long) =
-    ((hash.toDouble / Long.MaxValue) / 2) + 0.5
+    (hash.toDouble / Integer.toUnsignedLong(Int.MaxValue)) / 2
 
   def enterInput(model: Model): Model = {
     val newHash = hash(model.input)
@@ -211,7 +207,9 @@ object Tuple extends TyrianApp[Msg, Model]:
                     if (row.keep) "background-color: lightgray" else ""
                   tr(style := bgStyle)(
                     td(row.input),
-                    td(row.hash.toString),
+                    td(
+                      row.hash.toHexString
+                    ),
                     if (idx == model.topK - 1)
                       b(`class` := "green-text")(td(row.theta.toString))
                     else td(row.theta.toString),

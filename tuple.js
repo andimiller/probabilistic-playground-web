@@ -1,5 +1,5 @@
 import {
   TyrianApp
-} from './module/tuple/target/scala-3.1.2/tuple-fastopt.js';
+} from './module/tuple/target/scala-3.2.2/tuple-opt.js';
 
 TyrianApp.launch("myapp");

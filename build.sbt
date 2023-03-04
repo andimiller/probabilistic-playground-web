@@ -16,11 +16,13 @@ This / usefulTasks := Seq(
 
 val commonSettings = List(
   version      := "0.0.1",
-  scalaVersion := "3.1.2",
+  scalaVersion := "3.2.2",
   organization := "net.andimiller",
   libraryDependencies ++= Seq(
-    "io.indigoengine" %%% "tyrian-io" % "0.5.1",
-    "org.scalameta"   %%% "munit"     % "0.7.29" % Test
+    "io.indigoengine" %%% "tyrian-io"   % "0.5.1",
+    "org.scodec"      %%% "scodec-core" % "2.2.1",
+    "org.scodec"      %%% "scodec-bits" % "1.1.37",
+    "org.scalameta"   %%% "munit"       % "0.7.29" % Test
   ),
   testFrameworks += new TestFramework("munit.Framework"),
   scalaJSLinkerConfig ~= {
